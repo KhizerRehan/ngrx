@@ -83,7 +83,6 @@ export class ProductEditComponent implements OnInit, OnDestroy {
     this.store.pipe(
       select(fromProductFeatureSelector.getCurrentProduct))
       .subscribe((currentProduct: Product) => {
-         debugger;
          this.displayProduct(currentProduct)
       });
   }

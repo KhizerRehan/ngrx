@@ -29,3 +29,9 @@ export const getInitializeProduct = createSelector(
     getProductFeatureState,
     state => state.products
 )
+
+// GetError
+export const getError = createSelector(
+    getProductFeatureState,
+    state => state.error
+)

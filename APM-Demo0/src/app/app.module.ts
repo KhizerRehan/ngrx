@@ -4,7 +4,8 @@ import { HttpClientModule } from '@angular/common/http';
 
 // NGRX Store:
 import { StoreModule, Store } from '@ngrx/store';
-// import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { EffectsModule } from '@ngrx/effects';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 
 // Imports for loading & configuring the in-memory web api
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
@@ -30,10 +31,11 @@ import { environment } from 'src/environments/environment';
     UserModule,
     AppRoutingModule,
     StoreModule.forRoot({}),
-    // StoreDevtoolsModule.instrument({
-    //   maxAge: 25, // Retains last 25 states
-    //   logOnly: environment.production, // Restrict extension to log-only mode
-    // }),
+    EffectsModule.forRoot([]),
+    StoreDevtoolsModule.instrument({
+      maxAge: 25, // Retains last 25 states
+      logOnly: environment.production, // Restrict extension to log-only mode
+    }),
   ],
   declarations: [
     AppComponent,

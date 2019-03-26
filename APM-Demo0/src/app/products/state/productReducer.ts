@@ -13,13 +13,15 @@ export interface AppState extends fromRoot.AppState {
 export interface ProductState {
     showProductCode: boolean,
     currentProduct: Product,
-    products: Product[]
+    products: Product[],
+    error: string
 }
 
 const InitialProductState: ProductState = {
     showProductCode: true,
     currentProduct: null,
-    products: []
+    products: [],
+    error: ''
 }
 
 
@@ -35,7 +37,6 @@ export function productReducer(prevState: ProductState = InitialProductState, ac
                 showProductCode: actionToPerform.payload
             };
         case ProductActionTypes.SetCurrentProduct:
-        debugger;
             return {
                 ...prevState,
                 currentProduct: { ...actionToPerform.payload }
@@ -60,7 +61,14 @@ export function productReducer(prevState: ProductState = InitialProductState, ac
         case ProductActionTypes.LoadSuccess: 
          return {
              ...prevState,
-             products: actionToPerform.payload
+             products: actionToPerform.payload,
+             error: ''
+         }
+         case ProductActionTypes.LoadFail: 
+         return {
+             ...prevState,
+             products: [],
+             error: actionToPerform.payload
          }
         default:
             return prevState;

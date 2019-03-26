@@ -1,0 +1,6 @@
+[Project Helpful Links]:
+* https://ngrx.io/
+* https://github.com/angular/in-memory-web-api
+* https://app.pluralsight.com/library/courses/angular-ngrx-getting-started/table-of-contents
+* https://github.com/DeborahK/Angular-NgRx-GettingStarted
+

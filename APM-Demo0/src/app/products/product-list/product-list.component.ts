@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { Product } from '../product';
 import { ProductService } from '../product.service';
 import { Store, select } from '@ngrx/store';
-import { tap } from 'rxjs/operators';
+import { tap, takeWhile } from 'rxjs/operators';
 
 // NGRX:
 import * as fromProduct from '../state/productReducer';
@@ -28,45 +28,63 @@ export class ProductListComponent implements OnInit, OnDestroy {
   // Used to highlight the selected product in the list
   selectedProduct: Product | null;
   sub: Subscription;
+  errorMessage$: any;
+  componentActive: boolean = true; // To Keep Alive Subscription
 
   constructor(private store: Store<fromProduct.AppState>,
     private productService: ProductService) { }
 
   ngOnInit(): void {
-    this.sub = this.productService.selectedProductChanges$.subscribe(
-      selectedProduct => this.selectedProduct = selectedProduct
-    );
+
+    // this.sub = this.productService.selectedProductChanges$.subscribe(
+    //   selectedProduct => this.selectedProduct = selectedProduct
+    // );
 
     // this.productService.getProducts().subscribe(
     //   (products: Product[]) => this.products = products,
     //   (err: any) => this.errorMessage = err.error
     // );
 
-    // SHOW PRODUCT CODE:
+    // Do NOT subscribe here because it used an async pipe:
+    this.errorMessage$ = this.store.pipe(select(fromProductFeatureSelector.getError));
+
+    this.store.dispatch(new ProductActionsCreators.Load())
+  
+
+    //  SELECT_CURRENT_PRODUCT:
+    this.store.pipe(
+      select(fromProductFeatureSelector.getCurrentProduct),
+      tap((currentProduct) => console.log("Current Product", currentProduct)),
+      takeWhile(() => this.componentActive))
+      .subscribe((currentProduct: Product) => {
+        this.selectedProduct = currentProduct;
+      })
+
+    //  GET_PRODUCTS
+    // Subscribe here because it does not use an async pipe
+    this.store.pipe(
+      select(fromProductFeatureSelector.getProducts),
+      tap((val) => console.log('@Ngrx/Effexts Working  Products loading Async', val)),
+      takeWhile(() => this.componentActive)
+    ).subscribe((products: Product[]) => {
+      this.products = products;
+    })
+
+    // SHOW_PRODUCT_CODE:
     this.store.pipe(
       select(fromProductFeatureSelector.getShowProductCode),
-      tap((val) => console.log("Store Val", val)))
+      tap((val) => console.log("Store Val", val)),
+      takeWhile(() => this.componentActive))
       .subscribe((showProductCode: boolean) => {
         console.log('Retrievced SubSlice of a Product Slice', showProductCode);
         this.displayCode = showProductCode
       })
 
-
-
-    //  SELECT CURRENT PRODUCT:
-    this.store.pipe(
-      select(fromProductFeatureSelector.getCurrentProduct),
-      tap((currentProduct) => console.log("Current Product", currentProduct)))
-      .subscribe((currentProduct: Product) => {
-
-        this.selectedProduct = currentProduct;
-      })
-
-
   }
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
+    this.componentActive = false;
   }
 
   checkChanged(value: boolean): void {

@@ -51,9 +51,10 @@ export class ProductService {
     return this.http.post<Product>(this.productsUrl, product, { headers: headers })
       .pipe(
         tap(data => console.log('createProduct: ' + JSON.stringify(data))),
-        tap(data => {
-          this.products.push(data);
-        }),
+        // COMMENTED FOR STORE CALL AS WHILE ADDING NEW PRODUCT TO TIMES PRODUCT WAS ADDING DUE TO `this.products.push(data);`
+        // tap(data => {
+        //   this.products.push(data);
+        // }),
         catchError(this.handleError)
       );
   }

@@ -46,7 +46,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
     // );
 
     // Do NOT subscribe here because it used an async pipe:
-    this.errorMessage$ = this.store.pipe(select(fromProductFeatureSelector.getError));
+    this.errorMessage$ = this.store.pipe(select(fromProductFeatureSelector.getError))
 
     this.store.dispatch(new ProductActionsCreators.Load())
   

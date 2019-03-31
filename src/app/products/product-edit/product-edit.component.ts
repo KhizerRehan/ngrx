@@ -13,6 +13,7 @@ import { Store, select } from '@ngrx/store';
 import * as fromProduct from '../state/productReducer';
 import * as fromProductFeatureSelector from '../state/productFeatureSelectors';
 import * as ProductActionsCreators from '../state/productActionCreators';
+import { takeWhile } from 'rxjs/operators';
 
 @Component({
   selector: 'pm-product-edit',
@@ -31,6 +32,8 @@ export class ProductEditComponent implements OnInit, OnDestroy {
   displayMessage: { [key: string]: string } = {};
   private validationMessages: { [key: string]: { [key: string]: string } };
   private genericValidator: GenericValidator;
+  componentActive: boolean = true;
+  errorMessage$: any;
 
   constructor(private store: Store<fromProduct.AppState>, 
               private fb: FormBuilder,
@@ -79,12 +82,17 @@ export class ProductEditComponent implements OnInit, OnDestroy {
     );
 
     
-    //  SELECT CURRENT PRODUCT:
+    
+    // Watch for changes to the currently selected product
     this.store.pipe(
-      select(fromProductFeatureSelector.getCurrentProduct))
-      .subscribe((currentProduct: Product) => {
-         this.displayProduct(currentProduct)
-      });
+      select(fromProductFeatureSelector.getCurrentProduct),
+      takeWhile(() => this.componentActive)
+    ).subscribe(
+      currentProduct => this.displayProduct(currentProduct)
+    );
+
+    // Watch for changes to the error message
+    this.errorMessage$ = this.store.pipe(select(fromProductFeatureSelector.getError));
   }
 
   ngOnDestroy(): void {
@@ -131,10 +139,10 @@ export class ProductEditComponent implements OnInit, OnDestroy {
   deleteProduct(): void {
     if (this.product && this.product.id) {
       if (confirm(`Really delete the product: ${this.product.productName}?`)) {
-        this.productService.deleteProduct(this.product.id).subscribe(
-          () => this.store.dispatch(new ProductActionsCreators.ClearCurrentProduct()),
-          (err: any) => this.errorMessage = err.error
-        );
+        // this.productService.deleteProduct(this.product.id).subscribe(
+        //   () => this.store.dispatch(new ProductActionsCreators.ClearCurrentProduct()),
+        //   (err: any) => this.errorMessage = err.error
+        // );
       }
     } else {
       // No need to delete, it was never saved
@@ -152,17 +160,18 @@ export class ProductEditComponent implements OnInit, OnDestroy {
         const p = { ...this.product, ...this.productForm.value };
 
         if (p.id === 0) {
-          
-          this.productService.createProduct(p).subscribe(
-            product => this.store.dispatch(new ProductActionsCreators.SetCurrentProduct(p)),
-            (err: any) => this.errorMessage = err.error
-          );
+          // this.productService.createProduct(p).subscribe(
+          //   product => this.store.dispatch(new ProductActionsCreators.SetCurrentProduct(p)),
+          //   (err: any) => this.errorMessage = err.error
+          // );
+          this.store.dispatch(new ProductActionsCreators.CreateProduct(p));
         } else {
-          this.productService.updateProduct(p).subscribe(
-            product => this.store.dispatch(new ProductActionsCreators.SetCurrentProduct(p)),
-            (err: any) => this.errorMessage = err.error
-          );
-          this.store.dispatch(new ProductActionsCreators.SetCurrentProduct(p));
+          // this.productService.updateProduct(p).subscribe(
+          //   product => this.store.dispatch(new ProductActionsCreators.SetCurrentProduct(p)),
+          //   (err: any) => this.errorMessage = err.error
+          // );
+          // this.store.dispatch(new ProductActionsCreators.SetCurrentProduct(p));
+          this.store.dispatch(new ProductActionsCreators.UpdateProduct(p));
         }
       }
     } else {
